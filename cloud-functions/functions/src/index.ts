@@ -14,3 +14,9 @@ export const helloworld = v2.https.onRequest((request,response)=>{
 
 
 
+export const saveTask = v2.https.onRequest((request,response)=>{
+    const body = request.body;
+    response.json({
+        data:body
+    });
+})
