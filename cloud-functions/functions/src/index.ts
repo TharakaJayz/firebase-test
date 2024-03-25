@@ -24,3 +24,12 @@ export const createTask = v2.https.onRequest({cors:true},(request,response)=>{
 
 
 })
+
+
+exports.validateName=v2.https.onRequest({cors:true},(req,res:any)=>{
+    const name:any=req.query.name;
+    if (/\d/.test(name)) {
+        return res.status(400).json({ error: 'Name cannot contain numbers' });
+      }
+   res.json({ isValid: true });
+})
