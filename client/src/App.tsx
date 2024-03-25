@@ -20,7 +20,7 @@ function App() {
   },[])
 
   const createTaskHandler = async()  =>{
-    const cretedTaskResponse = await fetch("https://us-central1-curry-king-test-project.cloudfunctions.net/saveCollection",{
+    const cretedTaskResponse = await fetch("https://createtask-j3pqakbyaq-uc.a.run.app",{
       method:"POST",
       headers:{"Content-Type":"application/json"},
       body:JSON.stringify({
@@ -32,7 +32,7 @@ function App() {
         
       
       })
-    })
+    });
 
     console.log("createtask Response",cretedTaskResponse);
   }
