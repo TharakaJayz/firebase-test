@@ -19,15 +19,39 @@ function App() {
     getusers();
   },[])
 
+  const createTaskHandler = async()  =>{
+    const cretedTaskResponse = await fetch("https://us-central1-curry-king-test-project.cloudfunctions.net/saveCollection",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
+
+        date:"2024-03-25",
+        task_description:"test task from client",
+        task_status:false,
+        userID:"test id"
+        
+      
+      })
+    })
+
+    console.log("createtask Response",cretedTaskResponse);
+  }
+
   const handleGoogleSignIn = async () => {
     const provider = new GoogleAuthProvider();
+   
     try {
       const result = await signInWithPopup(auth, provider);
-      // Handle successful login (e.g., store user data, redirect)
+      const user = result.user;
+      const idToken = await user.getIdToken();
+      console.log("logged user token",idToken);
+      
+      
+   
       console.log(result);
     } catch (error) {
       console.error(error);
-      // Handle errors (e.g., display error message)
+     
     }
   };
 
@@ -38,6 +62,7 @@ function App() {
      <button onClick={handleGoogleSignIn}>
       SIgn in
      </button>
+     <button onClick={createTaskHandler}>save task</button>
     </div>
   );
 }

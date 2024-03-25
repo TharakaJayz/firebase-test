@@ -1,22 +1,27 @@
 import * as v2 from "firebase-functions/v2";
+const admin = require('firebase-admin');
+const cors = require('cors')({ origin: true });
 
-type INdexible = {[key:string]:any}
+admin.initializeApp();
 
-export const helloworld = v2.https.onRequest((request,response)=>{
+
+const firestore = admin.firestore();
+
+
+export const createTask = v2.https.onRequest((request,response)=>{
+    cors(request, response, () => {
+    const data = request.body;
+    if(data.date.length===0 || data.task_description.length===undefined || data.task_status===undefined || data.userID.length===undefined){
+        return response.send(400).json({
+            message:"Bad Request !"
+        })
+    };
+
+    response.set('Access-Control-Allow-Origin', '*');
+
     
-    const name  = request.params[0].replace('/','');
-    const items:INdexible = {lamp:"lamp text",chair:"chair text"};
-    const message = items[name];
 
-    response.send(`<h1> ${message} </h1>`)
+    return firestore.collection('Tasks').add(data).then(()=>{return response.send(200).json({messsage:"task created succefully"})}).catch((err:any) =>{return response.status(500).json({message:"Internal server error"})})
+
 })
-
-
-
-
-export const saveTask = v2.https.onRequest((request,response)=>{
-    const body = request.body;
-    response.json({
-        data:body
-    });
 })
