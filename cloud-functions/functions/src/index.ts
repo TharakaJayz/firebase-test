@@ -1,5 +1,9 @@
 import * as v2 from "firebase-functions/v2";
 const admin = require('firebase-admin');
+import {
+    onDocumentDeleted,
+    onDocumentUpdated
+  } from "firebase-functions/v2/firestore";
 
 admin.initializeApp();
 
@@ -33,3 +37,6 @@ exports.validateName=v2.https.onRequest({cors:true},(req,res:any)=>{
       }
    res.json({ isValid: true });
 })
+
+
+export const onTaskCreate = onDocumentUpdated("tas")
