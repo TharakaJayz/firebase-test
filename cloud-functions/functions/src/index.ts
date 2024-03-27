@@ -46,3 +46,15 @@ exports.updateUser = v1.firestore
       }
     }
 });
+
+exports.createNewUser=v1.firestore.document('/{collection}/{id}')
+.onCreate((snap,context)=>{
+  console.log(snap.data())
+  const collection=context.params.collection;
+  //const id=context.params.id
+  const users=admin.firestore().collection('Users');
+  if(collection==='Users'){
+    return users.add({text:'new user is added'})
+  }
+  return null;
+})
