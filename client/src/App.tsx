@@ -17,6 +17,7 @@ function App() {
   const [email, setEmail] = useState<string>("");
   const [users, setUsers] = useState<any[]>([]);
   const [singleUser, setSingleUser] = useState<any>(null);
+  const [updatedName, setUpdatedName] = useState<string>(""); 
   const usersCollectionRef = collection(db, "Users");
   const userById = doc(db, "Users", "IPo8bSmhTyO1TmTczW5Z");
 
@@ -111,7 +112,15 @@ function App() {
       alert("Network Error");
     }
   };
-
+  const updateCurrentUser = async () => { 
+      const response = await fetch("", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({})
+      });   
+      console.log("Updated Name",response)
+  };
+  
   return (
     <div className="App">
       <button onClick={handleGoogleSignIn}>Sign in with Google</button>
@@ -156,7 +165,16 @@ function App() {
                 <p>Email: {singleUser.email}</p>
               </div>
             )}
+            <div>
+            <input
+                  type="text"
+                  value={updatedName}
+                  onChange={(e) => setUpdatedName(e.target.value)}
+                />
+                <button onClick={updateCurrentUser}>Update Name</button>
+            </div>
           </h4>
+      
         </div>
       </div>
     </div>

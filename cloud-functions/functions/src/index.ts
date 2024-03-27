@@ -1,6 +1,6 @@
 import * as v2 from "firebase-functions/v2";
 import * as v1 from "firebase-functions/v1";
-import { onDocumentUpdated } from "firebase-functions/v2/firestore";
+import { onDocumentCreated } from 'firebase-functions/v2/firestore';
 const admin = require('firebase-admin');
 
 admin.initializeApp();
@@ -28,39 +28,73 @@ exports.validateName=v2.https.onRequest({cors:true},(req,res:any)=>{
    res.json({ isValid: true });
 })
 
-  exports.updateName = onDocumentUpdated('Users/{userId}', async (event:any) => {
-    const data = event.data.after.data();
-    const previousData = event.data.before.data();
-    const userId = event.params.userId;
-    if (data.name !== previousData.name) {
-        try {
-            await firestore.collection('Users').doc(userId).update({
-              name: data
-            });
-          console.log('Name updated successfully:', data);
-        } catch (error) {
-          console.error('Error updating name:', error);
-        }
-    }
-  });
+// exports.updateUser = v1.firestore
+// .document('/Users/{userId}')
+// .onUpdate(async (change, context) => { 
+//   const newValue = change.after.data();
+//   const previousValue = change.before.data();
+
+//   if (newValue.name && previousValue.name && newValue.name !== previousValue.name) { 
+//       const userId = context.params.userId;
+//       const newName = newValue.name;
+      
+//       try {
+//           await firestore.collection('Users').doc(userId).update({
+//             name: newName
+//           });
+//         console.log('Name updated successfully:', newName);
+//       } catch (error) {
+//         console.error('Error updating name:', error);
+//       }
+//     }
+//   });
 
 
 type taskData = {date:Date,task_description:string,task_status:boolean,userID:string}
-  export const newTask = v1.firestore.document('/tasks/{sku}').onCreate(snapshot =>{
-    
+
+
+  
+
+  export const newTask = onDocumentCreated({document:"Tasks/{taskId}"},async event =>{
     
     const regex = /\d/;
-    let data = snapshot.data() as taskData;
-    console.log("new task data",snapshot.data());
+    if(!event.data){
+      throw ""
+    }
+    let data = event.data.data() as taskData;
+    // console.log("new task data",event.data);
     let newDescription = "";
   
     if(regex.test(data.task_description)){
       
       newDescription = "without numbers";
-      return newDescription
+      data = {...data ,task_description :newDescription};
+      // console.log("new description created")
+      
+    }
+    try{
+      const result =  await event.data.ref.set({...data},{merge:true});
+   console.log("result",result);
+
+    }catch(err){
+      console.log("task updat error",err)
     }
     
-   return snapshot.ref.set(data);
+   
+  //  return result;
   })
 
   
+
+
+
+
+exports.createNewUser=v1.firestore.document('/Users/{userid}').onCreate(snapshot =>{
+  let userToCreate = snapshot.data();
+  const capitalizedName = userToCreate.name ? userToCreate.name.charAt(0).toUpperCase() + userToCreate.name.slice(1) : '';
+
+  userToCreate = {...userToCreate,name:capitalizedName};
+
+  return snapshot.ref.set({...userToCreate},{merge:true});
+})
+
