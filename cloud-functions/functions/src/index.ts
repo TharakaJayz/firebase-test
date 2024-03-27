@@ -1,9 +1,8 @@
 import * as v2 from "firebase-functions/v2";
 import {
   onDocumentCreated,
+  onDocumentDeleted,
   onDocumentUpdated,
-  Change,
-  FirestoreEvent,
 } from "firebase-functions/v2/firestore";
 const admin = require("firebase-admin");
 
@@ -41,8 +40,9 @@ exports.validateName = v2.https.onRequest({ cors: true }, (req, res: any) => {
   if (/\d/.test(name)) {
     return res.status(400).json({ error: "Name cannot contain numbers" });
   }
-  res.json({ isValid: true });
+  return res.json({ isValid: true });
 });
+
 
 exports.updateUser = onDocumentUpdated("/Users/{userId}", async(event) => {
   if (!event.data) {
@@ -51,13 +51,14 @@ exports.updateUser = onDocumentUpdated("/Users/{userId}", async(event) => {
   const newValue = event.data.after.data();
   const previousValue = event.data.before.data();
 
-  if (
-    newValue.name &&
-    previousValue.name &&
-    newValue.name !== previousValue.name
+  if (newValue.name !== previousValue.name
   ) {
     const userId = event.params.userId;
-    const newName = newValue.name;
+    let newName = newValue.name;
+
+    if(newValue.name===""){
+      newName = previousValue. name;
+    }
 
     try {
       await firestore.collection("Users").doc(userId).update({
@@ -70,6 +71,7 @@ exports.updateUser = onDocumentUpdated("/Users/{userId}", async(event) => {
   }
 });
 
+
 type taskData = {
   date: Date;
   task_description: string;
@@ -77,7 +79,7 @@ type taskData = {
   userID: string;
 };
 
-export const newTask = onDocumentCreated(
+export const newTaskTrigger = onDocumentCreated(
   { document: "Tasks/{taskId}" },
   async (event) => {
     const regex = /\d/;
@@ -127,3 +129,8 @@ exports.createNewUser = onDocumentCreated(
     }
   }
 );
+
+export const userDeleteTrigger = onDocumentDeleted("Users/{userId}",async(event)=>{
+  const deletedData = event.data?.data();
+  console.log("This is deleted data",deletedData);
+})
