@@ -1,5 +1,5 @@
 import * as v2 from "firebase-functions/v2";
-import { onDocumentUpdated } from "firebase-functions/v2/firestore";
+import * as v1 from 'firebase-functions/v1'
 const admin = require('firebase-admin');
 admin.initializeApp();
 const firestore = admin.firestore();
@@ -26,18 +26,23 @@ exports.validateName=v2.https.onRequest({cors:true},(req,res:any)=>{
    res.json({ isValid: true });
 })
 
-  exports.updateName = onDocumentUpdated('Users/{userId}', async (event:any) => {
-    const data = event.data.after.data();
-    const previousData = event.data.before.data();
-    const userId = event.params.userId;
-    if (data.name !== previousData.name) {
-        try {
-            await firestore.collection('Users').doc(userId).update({
-              name: data
-            });
-          console.log('Name updated successfully:', data);
-        } catch (error) {
-          console.error('Error updating name:', error);
-        }
+exports.updateUser = v1.firestore
+.document('/Users/{userId}')
+.onUpdate(async (change, context) => { 
+  const newValue = change.after.data();
+  const previousValue = change.before.data();
+
+  if (newValue.name && previousValue.name && newValue.name !== previousValue.name) { 
+      const userId = context.params.userId;
+      const newName = newValue.name;
+      
+      try {
+          await firestore.collection('Users').doc(userId).update({
+            name: newName
+          });
+        console.log('Name updated successfully:', newName);
+      } catch (error) {
+        console.error('Error updating name:', error);
+      }
     }
-  });
+});
