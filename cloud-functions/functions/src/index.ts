@@ -130,9 +130,29 @@ exports.createNewUser = onDocumentCreated(
   }
 );
 
+// type deletedUserDataType  = {name:string,email:string};
+
 export const userDeleteTrigger = onDocumentDeleted("Users/{userId}",async(event)=>{
-  const deletedData = event.data?.data();
-  console.log("This is deleted data",deletedData);
+  let deltedUserId = event.params.userId;
+  console.log("This is deleted user id",deltedUserId.trim());
+
+  try{
+    
+    // const deletedTaskQuerySnapshot = await firestore.collection("Tasks").get();
+    const deletedTaskQuerySnapshot = await admin.firestore().collection("Tasks").where("userId","==","lLBMm5tjMq5PLz8KEUZV").get();
+
+    console.log("deleted User Tasks",deletedTaskQuerySnapshot.docs.map((doc:any)=>({...doc.data(),id:doc.id})));
+
+    // correctly getlting tasks taht related to user
+
+
+  }catch(err){
+    console.log("erro of getting data related to deleted user",err);
+  }
+
+ 
+
+
 })
 
 
