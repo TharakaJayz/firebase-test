@@ -5,7 +5,6 @@ import {
   onDocumentUpdated,
 } from "firebase-functions/v2/firestore";
 const admin = require("firebase-admin");
-
 admin.initializeApp();
 const firestore = admin.firestore();
 
@@ -104,6 +103,7 @@ export const newTaskTrigger = onDocumentCreated(
 
     //  return result;
   }
+  
 );
 
 exports.createNewUser = onDocumentCreated(
@@ -134,3 +134,24 @@ export const userDeleteTrigger = onDocumentDeleted("Users/{userId}",async(event)
   const deletedData = event.data?.data();
   console.log("This is deleted data",deletedData);
 })
+
+
+exports.updateTaskCount = onDocumentCreated(
+  {document:'Tasks/{taskId}'},
+async (event) => {
+  if (!event.data) {
+    throw "err";
+  }
+  const taskData = event.data?.data();
+  const userId = taskData.userId;
+  const userRef = await admin.firestore().collection('Users').doc(userId);
+  console.log("userRef",await userRef.get())
+  const numberOfTasks=await userRef.get()
+  await userRef.update({
+      task_count: admin.firestore.FieldValue.incremet(1)
+  });
+  console.log(userRef.task_count)
+  console.log("numberOfTasks",numberOfTasks._fieldsProto.task_count.integerValue);
+});
+
+
