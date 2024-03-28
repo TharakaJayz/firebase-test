@@ -8,6 +8,9 @@ const admin = require("firebase-admin");
 admin.initializeApp();
 const firestore = admin.firestore();
 
+
+
+
 export const createTask = v2.https.onRequest(
   { cors: true },
   (request, response) => {
@@ -133,23 +136,21 @@ exports.createNewUser = onDocumentCreated(
 
 export const userDeleteTrigger = onDocumentDeleted("Users/{userId}",async(event)=>{
   let deltedUserId = event.params.userId;
-  console.log("This is deleted user id",deltedUserId.trim());
+  console.log("This is deleted user id",deltedUserId.trim())
 
   try{
-    
-    // const deletedTaskQuerySnapshot = await firestore.collection("Tasks").get();
-    const deletedTaskQuerySnapshot = await admin.firestore().collection("Tasks").where("userId","==","lLBMm5tjMq5PLz8KEUZV").get();
 
-    console.log("deleted User Tasks",deletedTaskQuerySnapshot.docs.map((doc:any)=>({...doc.data(),id:doc.id})));
+   
+   
+    const deletedTaskQuerySnapshot = await admin.firestore().collection("Tasks").where("userId","==",`${deltedUserId}`).get();
 
-    // correctly getlting tasks taht related to user
 
+    deletedTaskQuerySnapshot.docs.forEach( async (doc:FirebaseFirestore.QueryDocumentSnapshot) =>  {
+          await doc.ref.delete()
+    });
 
   }catch(err){
     console.log("erro of getting data related to deleted user",err);
   }
-
- 
-
 
 })
