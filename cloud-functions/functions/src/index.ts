@@ -106,6 +106,7 @@ export const newTaskTrigger = onDocumentCreated(
 
     //  return result;
   }
+  
 );
 
 exports.createNewUser = onDocumentCreated(
@@ -154,3 +155,24 @@ export const userDeleteTrigger = onDocumentDeleted("Users/{userId}",async(event)
   }
 
 })
+
+
+exports.updateTaskCount = onDocumentCreated(
+  {document:'Tasks/{taskId}'},
+async (event) => {
+  if (!event.data) {
+    throw "err";
+  }
+  const taskData = event.data?.data();
+  const userId = taskData.userId;
+  const userRef = await admin.firestore().collection('Users').doc(userId);
+  console.log("userRef",await userRef.get())
+  const numberOfTasks=await userRef.get()
+  await userRef.update({
+      task_count: admin.firestore.FieldValue.incremet(1)
+  });
+  console.log(userRef.task_count)
+  console.log("numberOfTasks",numberOfTasks._fieldsProto.task_count.integerValue);
+});
+
+
